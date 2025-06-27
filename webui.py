@@ -23,6 +23,12 @@ import librosa
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append("{}/third_party/Matcha-TTS".format(ROOT_DIR))
+
+from vllm import ModelRegistry
+from cosyvoice.vllm.cosyvoice2 import CosyVoice2ForCausalLM
+
+ModelRegistry.register_model("CosyVoice2ForCausalLM", CosyVoice2ForCausalLM)
+
 from cosyvoice.cli.cosyvoice import CosyVoice, CosyVoice2
 from cosyvoice.utils.file_utils import load_wav, logging
 from cosyvoice.utils.common import set_all_random_seed
@@ -157,7 +163,7 @@ def generate_audio(
     else:
         logging.info("get instruct inference request")
         set_all_random_seed(seed)
-        for i in cosyvoice.inference_instruct(
+        for i in cosyvoice.inference_instruct2(
             tts_text, sft_dropdown, instruct_text, stream=stream, speed=speed
         ):
             yield (cosyvoice.sample_rate, i["tts_speech"].numpy().flatten())
@@ -260,23 +266,20 @@ def main():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--port", type=int, default=50000)
     parser.add_argument(
         "--model_dir",
         type=str,
-        default="pretrained_models/CosyVoice2-0.5B",
+        default="/app/models/iic/CosyVoice2-0.5B",
         help="local path or modelscope repo id",
     )
     args = parser.parse_args()
     try:
-        cosyvoice = CosyVoice(args.model_dir)
+        cosyvoice = CosyVoice2(
+            args.model_dir, load_vllm=True
+        )
     except Exception:
-        try:
-            cosyvoice = CosyVoice2(
-                args.model_dir, load_jit=True, load_trt=False, load_vllm=True, fp16=True
-            )
-        except Exception:
-            raise TypeError("no valid model_type!")
+        raise TypeError("no valid model_type!")
 
     sft_spk = cosyvoice.list_available_spks()
     if len(sft_spk) == 0:
