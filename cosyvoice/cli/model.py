@@ -277,7 +277,6 @@ class CosyVoice2Model(CosyVoiceModel):
         engine_args = EngineArgs(model=model_dir,
                                  skip_tokenizer_init=True,
                                  enable_prompt_embeds=True,
-                                #  enforce_eager=True, # OOM
                                  gpu_memory_utilization=0.1,
                                  )
         self.llm.vllm = LLMEngine.from_engine_args(engine_args)
