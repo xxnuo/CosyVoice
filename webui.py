@@ -162,9 +162,10 @@ def generate_audio(
             yield (cosyvoice.sample_rate, i["tts_speech"].numpy().flatten())
     else:
         logging.info("get instruct inference request")
+        prompt_speech_16k = postprocess(load_wav(prompt_wav, prompt_sr))
         set_all_random_seed(seed)
         for i in cosyvoice.inference_instruct2(
-            tts_text, sft_dropdown, instruct_text, stream=stream, speed=speed
+            tts_text, instruct_text, prompt_speech_16k, sft_dropdown, stream=stream, speed=speed
         ):
             yield (cosyvoice.sample_rate, i["tts_speech"].numpy().flatten())
 
