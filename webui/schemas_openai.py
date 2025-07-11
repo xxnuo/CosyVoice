@@ -114,7 +114,7 @@ class OpenAISpeechRequest(BaseModel):
     )
     stream: bool = Field(
         default=True,  # Default to streaming for OpenAI compatibility
-        description="If true (default), audio will be streamed as it's generated. Each chunk will be a complete sentence. do not change it",
+        description="If true (default), audio will be streamed as it's generated. Each chunk will be a complete sentence.",
     )
     return_download_link: bool = Field(
         default=False,
@@ -125,7 +125,8 @@ class OpenAISpeechRequest(BaseModel):
         description="[Unused] Optional language code to use for text processing. If not provided, will use first letter of voice name.",
     )
     volume_multiplier: Optional[float] = Field(
-        default=1.0, description="A volume multiplier to multiply the output audio by."
+        default=Config.max_val,
+        description="A volume multiplier to multiply the output audio by.",
     )
     normalization_options: Optional[NormalizationOptions] = Field(
         default=NormalizationOptions(),
