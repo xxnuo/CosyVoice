@@ -5,9 +5,9 @@ import numpy as np
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import FileResponse, Response, StreamingResponse
 
-from CosyVoice.webui.schemas_openai import OpenAISpeechRequest
 from webui.config import Config
 from webui.router_model import engine, global_engine_lock
+from webui.schemas_openai import OpenAISpeechRequest
 
 logger = logging.getLogger()
 router = APIRouter(
