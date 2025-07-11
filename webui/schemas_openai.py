@@ -1,8 +1,9 @@
-from email.policy import default
 from enum import Enum
 from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
+
+from webui.config import Config
 
 
 class VoiceCombineRequest(BaseModel):
@@ -69,7 +70,7 @@ class NormalizationOptions(BaseModel):
     )
     replace_remaining_symbols: bool = Field(
         default=True,
-        description="Replaces the remaining symbols after normalization with their words"
+        description="Replaces the remaining symbols after normalization with their words",
     )
 
 
@@ -77,17 +78,18 @@ class OpenAISpeechRequest(BaseModel):
     """Request schema for OpenAI-compatible speech endpoint"""
 
     model: str = Field(
-        default="kokoro",
-        description="The model to use for generation. Supported models: tts-1, tts-1-hd, kokoro",
+        default=Config.model_name,
+        description=f"Default model: {Config.model_name}, do not change it",
     )
     input: str = Field(..., description="The text to generate audio for")
     voice: str = Field(
-        default="zf_094",
-        description="The voice to use for generation. Can be a base voice or a combined voice name.",
+        default="中文女",
+        description="Default voice: 中文女, 来自预训练音色列表（/audio/voices_sft）",
     )
-    response_format: Literal["mp3", "opus", "aac", "flac", "wav", "pcm"] = Field(
-        default="mp3",
-        description="The format to return audio in. Supported formats: mp3, opus, flac, wav, pcm. PCM format returns raw 16-bit samples without headers. AAC is not currently supported.",
+    # response_format: Literal["mp3", "opus", "aac", "flac", "wav", "pcm"] = Field(
+    response_format: Literal["wav"] = Field(
+        default="wav",
+        description="The format to return audio in. Supported format: wav, do not change it",
     )
     download_format: Optional[Literal["mp3", "opus", "aac", "flac", "wav", "pcm"]] = (
         Field(
@@ -114,8 +116,7 @@ class OpenAISpeechRequest(BaseModel):
         description="Optional language code to use for text processing. If not provided, will use first letter of voice name.",
     )
     volume_multiplier: Optional[float] = Field(
-        default = 1.0,
-        description="A volume multiplier to multiply the output audio by."
+        default=1.0, description="A volume multiplier to multiply the output audio by."
     )
     normalization_options: Optional[NormalizationOptions] = Field(
         default=NormalizationOptions(),
@@ -162,8 +163,7 @@ class CaptionedSpeechRequest(BaseModel):
         description="Optional language code to use for text processing. If not provided, will use first letter of voice name.",
     )
     volume_multiplier: Optional[float] = Field(
-        default = 1.0,
-        description="A volume multiplier to multiply the output audio by."
+        default=1.0, description="A volume multiplier to multiply the output audio by."
     )
     normalization_options: Optional[NormalizationOptions] = Field(
         default=NormalizationOptions(),

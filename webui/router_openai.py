@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 
 from webui.config import Config
 from webui.router_model import engine, global_engine_lock
-from webui.schemas import OpenAISpeechRequest
+from CosyVoice.webui.schemas_openai import OpenAISpeechRequest
 
 logger = logging.getLogger()
 router = APIRouter(
