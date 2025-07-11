@@ -31,7 +31,7 @@ def manual_unload_model():
     return {"status": "success", "message": "模型已卸载"}
 
 
-@router.post("/model/load", description="手动加载模型")
+@router.post("/model/load", description="手动加载模型，大约需要 2 分钟")
 def manual_load_model(model: str = Config.model_name):
     """手动加载模型接口"""
     try:
