@@ -1,6 +1,7 @@
 import os
 import random
 import sys
+from typing import Literal
 
 import librosa
 import numpy as np
@@ -80,7 +81,9 @@ class CosyVoiceEngine:
 
     def generate(
         self,
-        mode: str = "sft",  # 可选值：sft（预训练音色）、clone（3s极速复刻）、crosslingual（跨语种复刻）
+        mode: Literal[
+            "sft", "clone", "crosslingual"
+        ] = "sft",  # 可选值：sft（预训练音色）、clone（3s极速复刻）、crosslingual（跨语种复刻）
         sft_spk: str = "",  # 要使用的预训练音色，如果为空，则使用默认音色
         tts_text: str = "",  # 要生成的文本
         prompt_wav_text: str = "",  # 要使用的提示文本
