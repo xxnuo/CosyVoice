@@ -1,13 +1,13 @@
 import logging
 import os
-from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, Request, Header
-from fastapi.responses import FileResponse
+import numpy as np
+from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi.responses import FileResponse, Response, StreamingResponse
 
+from CosyVoice.webui.schemas_openai import OpenAISpeechRequest
 from webui.config import Config
 from webui.router_model import engine, global_engine_lock
-from CosyVoice.webui.schemas_openai import OpenAISpeechRequest
 
 logger = logging.getLogger()
 router = APIRouter(
@@ -76,7 +76,7 @@ def create_speech(
         )
 
     # 检查音色是否存在
-    prmopt_wav_path = ""  # 提示音色音频路径
+    prompt_wav_path = ""  # 提示音色音频路径
     prompt_wav_text = ""  # 提示音色音频文本
     if mode == "sft":
         if voice not in engine.get_available_spks():
@@ -136,9 +136,30 @@ def create_speech(
                 max_val=request.volume_multiplier,
             )
             if request.stream:
-                pass
+                # 流式返回音频数据
+                async def stream_audio():
+                    for Config.sample_rate, audio_data in generator:
+                        # 将 numpy 数组转换为 bytes
+                        audio_bytes = (audio_data * (2**15)).astype("int16").tobytes()
+                        yield audio_bytes
+
+                return StreamingResponse(stream_audio(), media_type="audio/wav")
             else:
-                pass
+                # 非流式模式：收集所有音频片段并合并
+                audio_chunks = []
+                for _, audio_data in generator:
+                    audio_chunks.append(audio_data)
+
+                # 合并所有音频片段
+                if audio_chunks:
+                    combined_audio = np.concatenate(audio_chunks)
+                    audio_bytes = (combined_audio * (2**15)).astype("int16").tobytes()
+
+                    return Response(content=audio_bytes, media_type="audio/wav")
+                else:
+                    raise HTTPException(
+                        status_code=500, detail="音频生成失败：没有生成任何音频数据"
+                    )
     except Exception as e:
         logger.error(f"生成音频失败: {str(e)}")
         raise HTTPException(status_code=500, detail=f"生成音频失败: {str(e)}")
