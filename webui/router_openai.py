@@ -28,7 +28,7 @@ def voice_sft_list():
 @router.post("/audio/voices", description="获取预装音色列表")
 def voice_list():
     """获取预装音色列表"""
-    voices = [file for file in os.listdir(Config.voice_dir) if file.endswith('.wav')]
+    voices = [file for file in os.listdir(Config.voice_dir) if file.endswith(".wav")]
     return {"status": "success", "voices": voices}
 
 
@@ -41,7 +41,7 @@ def voice_listen(voice: str):
     return FileResponse(voice_wav_path)
 
 
-@router.post("/audio/speech", description="生成音频，自动加载模型")
+@router.get("/audio/speech", description="生成音频，自动加载模型")
 def create_speech(
     request: OpenAISpeechRequest,
     # client_request: Request,  # 兼容性参数
