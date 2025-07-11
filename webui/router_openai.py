@@ -151,7 +151,6 @@ def create_speech(
                     stream_audio(),
                     media_type=f"audio/{request.response_format}",
                     headers={
-                        "Content-Disposition": f"attachment; filename=speech.{request.response_format}",
                         "X-Accel-Buffering": "no",
                         "Cache-Control": "no-cache",
                         "Transfer-Encoding": "chunked",
@@ -172,7 +171,6 @@ def create_speech(
                         content=audio_bytes,
                         media_type=f"audio/{request.response_format}",
                         headers={
-                            "Content-Disposition": f"attachment; filename=speech.{request.response_format}",
                             "Cache-Control": "no-cache",
                         },
                     )
