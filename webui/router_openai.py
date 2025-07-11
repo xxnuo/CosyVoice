@@ -138,7 +138,7 @@ def create_speech(
             if request.stream:
                 # 流式返回音频数据
                 async def stream_audio():
-                    for Config.sample_rate, audio_data in generator:
+                    for _, audio_data in generator:
                         # 将 numpy 数组转换为 bytes
                         audio_bytes = (audio_data * (2**15)).astype("int16").tobytes()
                         yield audio_bytes
