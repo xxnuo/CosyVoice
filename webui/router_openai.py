@@ -1,8 +1,10 @@
+import io
 import logging
 import os
+import wave
 
 import numpy as np
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import FileResponse, Response, StreamingResponse
 
 from webui.config import Config
@@ -143,6 +145,7 @@ def create_speech(
                 # 流式返回音频数据
                 async def stream_audio():
                     try:
+                        is_first_chunk = True
                         for sample_rate, audio_data in generator:
                             # 检查是否为空白音频块
                             if len(audio_data) == 0 or np.all(
@@ -152,10 +155,30 @@ def create_speech(
                                 continue
 
                             # 将 numpy 数组转换为 16 位整数
-                            audio_bytes = (
-                                (audio_data * (2**15)).astype("int16").tobytes()
-                            )
-                            yield audio_bytes
+                            audio_int16 = (audio_data * (2**15)).astype("int16")
+
+                            # 如果是第一个块，需要发送 WAV 头
+                            if is_first_chunk:
+                                # 创建 WAV 头
+                                wav_header = io.BytesIO()
+                                with wave.open(wav_header, "wb") as wav_file:
+                                    wav_file.setnchannels(1)  # 单声道
+                                    wav_file.setsampwidth(2)  # 16位 = 2字节
+                                    wav_file.setframerate(sample_rate)
+                                    # 只写入头部，不写入实际数据
+                                    wav_file.writeframes(b"")
+
+                                # 获取 WAV 头
+                                wav_header.seek(0)
+                                header_data = wav_header.read()
+
+                                # 只发送 WAV 头部（44字节）
+                                yield header_data
+                                is_first_chunk = False
+
+                            # 发送音频数据（不含头部）
+                            yield audio_int16.tobytes()
+
                     except Exception as e:
                         logger.error(f"流式音频生成错误: {str(e)}")
                         raise HTTPException(
@@ -198,10 +221,21 @@ def create_speech(
                     combined_audio = np.concatenate(audio_chunks)
 
                     # 转换为16位整数PCM
-                    audio_bytes = (combined_audio * (2**15)).astype("int16").tobytes()
+                    audio_int16 = (combined_audio * (2**15)).astype("int16")
+
+                    # 创建内存中的 WAV 文件
+                    wav_buffer = io.BytesIO()
+                    with wave.open(wav_buffer, "wb") as wav_file:
+                        wav_file.setnchannels(1)  # 单声道
+                        wav_file.setsampwidth(2)  # 16位 = 2字节
+                        wav_file.setframerate(sample_rate)
+                        wav_file.writeframes(audio_int16.tobytes())
+
+                    wav_buffer.seek(0)
+                    wav_data = wav_buffer.read()
 
                     return Response(
-                        content=audio_bytes,
+                        content=wav_data,
                         media_type=f"audio/{request.response_format}",
                         headers={
                             "Cache-Control": "no-cache",
