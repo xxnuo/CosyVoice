@@ -144,6 +144,13 @@ def create_speech(
                 async def stream_audio():
                     try:
                         for sample_rate, audio_data in generator:
+                            # 检查是否为空白音频块
+                            if len(audio_data) == 0 or np.all(
+                                np.abs(audio_data) < 1e-6
+                            ):
+                                logger.debug("跳过空白音频块")
+                                continue
+
                             # 将 numpy 数组转换为 16 位整数
                             audio_bytes = (
                                 (audio_data * (2**15)).astype("int16").tobytes()
@@ -173,6 +180,11 @@ def create_speech(
 
                 try:
                     for sr, audio_data in generator:
+                        # 检查是否为空白音频块
+                        if len(audio_data) == 0 or np.all(np.abs(audio_data) < 1e-6):
+                            logger.debug("跳过空白音频块")
+                            continue
+
                         audio_chunks.append(audio_data)
                         sample_rate = sr  # 保存采样率
                 except Exception as e:
