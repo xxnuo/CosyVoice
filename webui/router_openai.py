@@ -16,7 +16,10 @@ router = APIRouter(
 )
 
 
-@router.post("/audio/voices_sft", description="[专属] 获取模型自带音色列表")
+@router.post(
+    "/audio/voices_sft",
+    description="[专属] 获取模型自带音色列表，自动加载模型",
+)
 def voice_sft_list():
     """[专属] 获取模型自带音色列表，自动加载模型"""
     if engine.cosyvoice is None or not engine.ok:
@@ -45,7 +48,7 @@ def create_speech(
     # client_request: Request,  # 兼容性参数
     # x_raw_response: str,  # = Header(None, alias="x-raw-response"),  # 兼容性参数
 ):
-    """生成音频"""
+    """生成音频，自动加载模型"""
     # 解析请求
     tts_text = request.input
     if tts_text == "":
