@@ -18,7 +18,9 @@ router = APIRouter(
 
 @router.post("/audio/voices_sft", description="[专属] 获取模型自带音色列表")
 def voice_sft_list():
-    """[专属] 获取模型自带音色列表"""
+    """[专属] 获取模型自带音色列表，自动加载模型"""
+    if engine.cosyvoice is None or not engine.ok:
+        engine.load_model(Config.model_name)
     return {"status": "success", "voices": engine.get_available_spks()}
 
 
@@ -37,7 +39,7 @@ def voice_listen(voice: str):
     return FileResponse(voice_wav_path)
 
 
-@router.post("/audio/speech", description="生成音频")
+@router.post("/audio/speech", description="生成音频，自动加载模型")
 def create_speech(
     request: OpenAISpeechRequest,
     # client_request: Request,  # 兼容性参数
