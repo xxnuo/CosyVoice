@@ -89,13 +89,14 @@ class CosyVoiceEngine:
         prompt_wav_text: str = "",  # 要使用的提示文本
         prompt_wav_path: str = "",  # 要使用的提示音频
         prompt_wav_sr: int = Config.prompt_sr,  # 提示音频的采样率
+        max_val: float = Config.max_val,  # 音量最大值
         tts_sr: int = Config.sample_rate,  # 要生成的音频的采样率，默认与模型一致
         randomize_seed: bool = True,  # 是否随机化种子
         seed: int = 0,  # 随机种子
         stream: bool = False,  # 是否流式生成
         speed: float = 1.0,  # 说话速度
     ):
-        """生成图像并返回生成的图像列表和使用的种子"""
+        """生成音频并返回生成的音频流式数据：yield (tts_sr, i["tts_speech"].numpy().flatten())"""
         # 自动加载模型
         if self.cosyvoice is None or not self.ok:
             self.load_model(Config.model_name)
@@ -143,7 +144,7 @@ class CosyVoiceEngine:
         elif mode == "clone":
             logger.info("Get clone speech")
             prompt_speech_16k = self.postprocess(
-                load_wav(prompt_wav_path, prompt_wav_sr)
+                load_wav(prompt_wav_path, prompt_wav_sr), max_val=max_val
             )
             set_all_random_seed(seed)
             for i in self.cosyvoice.inference_cross_lingual(
@@ -153,7 +154,7 @@ class CosyVoiceEngine:
         elif mode == "crosslingual":
             logger.info("Get crosslingual speech")
             prompt_speech_16k = self.postprocess(
-                load_wav(prompt_wav_path, prompt_wav_sr)
+                load_wav(prompt_wav_path, prompt_wav_sr), max_val=max_val
             )
             set_all_random_seed(seed)
             for i in self.cosyvoice.inference_cross_lingual(
