@@ -83,8 +83,17 @@ class OpenAISpeechRequest(BaseModel):
     )
     input: str = Field(..., description="The text to generate audio for")
     voice: str = Field(
-        default="中文女",
-        description="Default voice: 中文女, 来自预训练音色列表（/audio/voices_sft）",
+        default="sft_中文女",
+        description="""默认: sft_中文女, 其中中文女来自模型自带音色。
+这个值由两部分组成，使用_连接：
+
+1. 模式标识：可选值为 sft（模型自带音色）、clone（克隆音色）、crosslingual（跨语种克隆音色）
+2. 音色标识：
+- 仅当模式为 sft 时，可选值为模型自带音色列表（/v1/audio/voices_sft）里的音色。
+- 仅当模式为 clone 时，可选值为预装音色列表（/v1/audio/voices）里的音色。
+- 仅当模式为 crosslingual 时，可选值为预装音色列表（/v1/audio/voices）里的音色。
+
+下版本添加支持用户上传音色音频""",
     )
     # response_format: Literal["mp3", "opus", "aac", "flac", "wav", "pcm"] = Field(
     response_format: Literal["wav"] = Field(
@@ -105,7 +114,7 @@ class OpenAISpeechRequest(BaseModel):
     )
     stream: bool = Field(
         default=True,  # Default to streaming for OpenAI compatibility
-        description="If true (default), audio will be streamed as it's generated. Each chunk will be a complete sentence.",
+        description="If true (default), audio will be streamed as it's generated. Each chunk will be a complete sentence. do not change it",
     )
     return_download_link: bool = Field(
         default=False,
@@ -125,7 +134,7 @@ class OpenAISpeechRequest(BaseModel):
 
 
 class CaptionedSpeechRequest(BaseModel):
-    """Request schema for captioned speech endpoint"""
+    """[Unused] Request schema for captioned speech endpoint"""
 
     model: str = Field(
         default=Config.model_name,
@@ -134,7 +143,7 @@ class CaptionedSpeechRequest(BaseModel):
     input: str = Field(..., description="The text to generate audio for")
     voice: str = Field(
         default="中文女",
-        description="Default voice: 中文女, 来自预训练音色列表（/audio/voices_sft）",
+        description="Default voice: 中文女, 来自模型自带音色列表（/audio/voices_sft）",
     )
     # response_format: Literal["mp3", "opus", "aac", "flac", "wav", "pcm"] = Field(
     response_format: Literal["wav"] = Field(
