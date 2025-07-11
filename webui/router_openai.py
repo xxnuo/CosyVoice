@@ -41,7 +41,7 @@ def voice_listen(voice: str):
     return FileResponse(voice_wav_path)
 
 
-@router.get("/audio/speech", description="生成音频，自动加载模型")
+@router.post("/audio/speech", description="生成音频，自动加载模型")
 def create_speech(
     request: OpenAISpeechRequest,
     # client_request: Request,  # 兼容性参数
