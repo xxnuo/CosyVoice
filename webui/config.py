@@ -10,7 +10,7 @@ class Config:
     model_dir = os.getenv("MODEL_DIR", "/data/models/huggingface")
     model_name = os.getenv("MODEL", "iic/CosyVoice2-0.5B")
     sample_rate = os.getenv("SAMPLE_RATE", 24000)
-    max_val = os.getenv("MAX_VAL", 0.8)
+    max_val = os.getenv("MAX_VAL", 1.0)
     prompt_sr = os.getenv("PROMPT_SR", 16000)
     default_spk = os.getenv("DEFAULT_SPK", "中文女")
 
