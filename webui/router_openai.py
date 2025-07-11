@@ -142,10 +142,14 @@ def create_speech(
             if request.stream:
                 # 流式返回音频数据
                 async def stream_audio():
-                    for _, audio_data in generator:
-                        # 将 numpy 数组转换为 bytes
-                        audio_bytes = (audio_data * (2**15)).astype("int16").tobytes()
-                        yield audio_bytes
+                    try:
+                        for sample_rate, audio_data in generator:
+                            # 将 numpy 数组转换为 bytes
+                            audio_bytes = (audio_data * (2**15)).astype("int16").tobytes()
+                            yield audio_bytes
+                    except Exception as e:
+                        logger.error(f"流式音频生成错误: {str(e)}")
+                        raise HTTPException(status_code=500, detail=f"流式音频生成错误: {str(e)}")
 
                 return StreamingResponse(
                     stream_audio(),
@@ -153,6 +157,7 @@ def create_speech(
                     headers={
                         "X-Accel-Buffering": "no",
                         "Cache-Control": "no-cache",
+                        "Content-Type": f"audio/{request.response_format}",
                         "Transfer-Encoding": "chunked",
                     },
                 )
