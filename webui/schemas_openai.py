@@ -94,7 +94,7 @@ class OpenAISpeechRequest(BaseModel):
     download_format: Optional[Literal["mp3", "opus", "aac", "flac", "wav", "pcm"]] = (
         Field(
             default=None,
-            description="Optional different format for the final download. If not provided, uses response_format.",
+            description="[Unused] Optional different format for the final download. If not provided, uses response_format.",
         )
     )
     speed: float = Field(
@@ -109,18 +109,18 @@ class OpenAISpeechRequest(BaseModel):
     )
     return_download_link: bool = Field(
         default=False,
-        description="If true, returns a download link in X-Download-Path header after streaming completes",
+        description="[Unused] If true, returns a download link in X-Download-Path header after streaming completes",
     )
     lang_code: Optional[str] = Field(
         default=None,
-        description="Optional language code to use for text processing. If not provided, will use first letter of voice name.",
+        description="[Unused] Optional language code to use for text processing. If not provided, will use first letter of voice name.",
     )
     volume_multiplier: Optional[float] = Field(
         default=1.0, description="A volume multiplier to multiply the output audio by."
     )
     normalization_options: Optional[NormalizationOptions] = Field(
         default=NormalizationOptions(),
-        description="Options for the normalization system",
+        description="[Unused] Options for the normalization system",
     )
 
 
@@ -128,17 +128,18 @@ class CaptionedSpeechRequest(BaseModel):
     """Request schema for captioned speech endpoint"""
 
     model: str = Field(
-        default="kokoro",
-        description="The model to use for generation. Supported models: tts-1, tts-1-hd, kokoro",
+        default=Config.model_name,
+        description=f"Default model: {Config.model_name}, do not change it",
     )
     input: str = Field(..., description="The text to generate audio for")
     voice: str = Field(
-        default="zf_094",
-        description="The voice to use for generation. Can be a base voice or a combined voice name.",
+        default="中文女",
+        description="Default voice: 中文女, 来自预训练音色列表（/audio/voices_sft）",
     )
-    response_format: Literal["mp3", "opus", "aac", "flac", "wav", "pcm"] = Field(
-        default="mp3",
-        description="The format to return audio in. Supported formats: mp3, opus, flac, wav, pcm. PCM format returns raw 16-bit samples without headers. AAC is not currently supported.",
+    # response_format: Literal["mp3", "opus", "aac", "flac", "wav", "pcm"] = Field(
+    response_format: Literal["wav"] = Field(
+        default="wav",
+        description="The format to return audio in. Supported format: wav, do not change it",
     )
     speed: float = Field(
         default=1.0,
@@ -152,20 +153,20 @@ class CaptionedSpeechRequest(BaseModel):
     )
     return_timestamps: bool = Field(
         default=True,
-        description="If true (default), returns word-level timestamps in the response",
+        description="[Unused] If true (default), returns word-level timestamps in the response",
     )
     return_download_link: bool = Field(
         default=False,
-        description="If true, returns a download link in X-Download-Path header after streaming completes",
+        description="[Unused] If true, returns a download link in X-Download-Path header after streaming completes",
     )
     lang_code: Optional[str] = Field(
         default=None,
-        description="Optional language code to use for text processing. If not provided, will use first letter of voice name.",
+        description="[Unused] Optional language code to use for text processing. If not provided, will use first letter of voice name.",
     )
     volume_multiplier: Optional[float] = Field(
         default=1.0, description="A volume multiplier to multiply the output audio by."
     )
     normalization_options: Optional[NormalizationOptions] = Field(
         default=NormalizationOptions(),
-        description="Options for the normalization system",
+        description="[Unused] Options for the normalization system",
     )
