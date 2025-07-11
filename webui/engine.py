@@ -113,10 +113,13 @@ class CosyVoiceEngine:
 
     def get_available_spks(self):
         """获取可用的模型自带音色列表"""
-        if self.cosyvoice is not None and self.ok:
-            self.reset_timer()  # 重置计时器
-            return self.cosyvoice.list_available_spks()
-        return []
+        # if self.cosyvoice is not None and self.ok:
+        #     self.reset_timer()  # 重置计时器
+        #     return self.cosyvoice.list_available_spks()
+        # return []
+
+        self.reset_timer()  # 重置计时器
+        return ["中文女", "中文男", "日语男", "粤语女", "英文女", "英文男", "韩语女"]
 
     def generate(
         self,
