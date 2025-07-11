@@ -22,8 +22,9 @@ router = APIRouter(
 )
 def voice_sft_list():
     """[专属] 获取模型自带音色列表，自动加载模型"""
-    if engine.cosyvoice is None or not engine.ok:
-        engine.load_model(Config.model_name)
+    with global_engine_lock:
+        if engine.cosyvoice is None or not engine.ok:
+            engine.load_model(Config.model_name)
     return {"status": "success", "voices": engine.get_available_spks()}
 
 
