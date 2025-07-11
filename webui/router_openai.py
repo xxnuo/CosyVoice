@@ -147,7 +147,16 @@ def create_speech(
                         audio_bytes = (audio_data * (2**15)).astype("int16").tobytes()
                         yield audio_bytes
 
-                return StreamingResponse(stream_audio(), media_type="audio/wav")
+                return StreamingResponse(
+                    stream_audio(),
+                    media_type=f"audio/{request.response_format}",
+                    headers={
+                        "Content-Disposition": f"attachment; filename=speech.{request.response_format}",
+                        "X-Accel-Buffering": "no",
+                        "Cache-Control": "no-cache",
+                        "Transfer-Encoding": "chunked",
+                    },
+                )
             else:
                 # 非流式模式：收集所有音频片段并合并
                 audio_chunks = []
@@ -159,7 +168,14 @@ def create_speech(
                     combined_audio = np.concatenate(audio_chunks)
                     audio_bytes = (combined_audio * (2**15)).astype("int16").tobytes()
 
-                    return Response(content=audio_bytes, media_type="audio/wav")
+                    return Response(
+                        content=audio_bytes,
+                        media_type=f"audio/{request.response_format}",
+                        headers={
+                            "Content-Disposition": f"attachment; filename=speech.{request.response_format}",
+                            "Cache-Control": "no-cache",
+                        },
+                    )
                 else:
                     raise HTTPException(
                         status_code=500, detail="音频生成失败：没有生成任何音频数据"
