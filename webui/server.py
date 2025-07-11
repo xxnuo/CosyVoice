@@ -3,8 +3,6 @@ import time
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from webui import router_model, router_openai
 
@@ -46,22 +44,6 @@ async def add_process_time_header(request: Request, call_next):
     process_time = time.time() - start_time
     response.headers["x-process-time"] = str(process_time)
     return response
-
-
-# 添加Gzip压缩中间件，但对音频路径禁用压缩
-class CustomGZipMiddleware(BaseHTTPMiddleware):
-    """自定义GZIP中间件，对音频路径禁用压缩"""
-    async def dispatch(self, request, call_next):
-        # 对音频路径禁用压缩
-        if request.url.path.startswith("/v1/audio/speech"):
-            return await call_next(request)
-        # 使用原始的GZip中间件
-        compression_middleware = GZipMiddleware(app=call_next)
-        return await compression_middleware(request)
-
-app.add_middleware(CustomGZipMiddleware)
-# 移除原始的GZip中间件
-# app.add_middleware(GZipMiddleware)
 
 # 注册路由
 app.include_router(router_openai.router, prefix="/v1")
