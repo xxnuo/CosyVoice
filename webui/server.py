@@ -17,7 +17,15 @@ logger = logging.getLogger()
 
 
 # 初始化 FastAPI 应用
-app = FastAPI(description="CosyVoice Server")
+app = FastAPI(
+    description="""CosyVoice OpenAI Compatible TTS Server
+
+音色：有三种类型的音色，一种是模型自带音色，一种是预装音色，一种是用户提供音频及音频文本。
+模型自带音色：在 /audio/voices_sft 接口中获取，是模型自带的音色，可以用于模型自带音色（mode=sft）生成任务。
+预装音色：在 /audio/voices 接口中获取，是系统预装的音色，可以用于克隆音色（mode=clone）、跨语种克隆（mode=crosslingual）任务。
+用户音频：与预装音色等价，可以用于克隆音色（mode=clone）、跨语种克隆（mode=crosslingual）任务。（注意：用户提供音频时，需要提供对应音频文本，否则会报错。）
+"""
+)
 
 # 配置 CORS
 app.add_middleware(

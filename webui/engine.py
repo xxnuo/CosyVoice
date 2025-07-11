@@ -74,7 +74,7 @@ class CosyVoiceEngine:
             self.ok = False
 
     def get_available_spks(self):
-        """获取可用的预训练音色列表"""
+        """获取可用的模型自带音色列表"""
         if self.cosyvoice is not None and self.ok:
             return self.cosyvoice.list_available_spks()
         return []
@@ -83,8 +83,8 @@ class CosyVoiceEngine:
         self,
         mode: Literal[
             "sft", "clone", "crosslingual"
-        ] = "sft",  # 可选值：sft（预训练音色）、clone（3s极速复刻）、crosslingual（跨语种复刻）
-        sft_spk: str = "",  # 要使用的预训练音色，如果为空，则使用默认音色
+        ] = "sft",  # 可选值：sft（模型自带音色）、clone（克隆音色）、crosslingual（跨语种克隆音色）
+        sft_spk: str = Config.default_spk,  # 要使用的模型自带音色，如果为空，则使用默认音色
         tts_text: str = "",  # 要生成的文本
         prompt_wav_text: str = "",  # 要使用的提示文本
         prompt_wav_path: str = "",  # 要使用的提示音频
@@ -110,14 +110,14 @@ class CosyVoiceEngine:
 
         # 检查可选参数
         if mode == "sft":
-            # 预训练生成需要指定预训练音色
+            # 模型自带生成需要指定模型自带音色
             if sft_spk == "":
                 sft_spks = self.get_available_spks()
                 if len(sft_spks) == 0:
-                    raise ValueError("没有可用的预训练音色")
+                    raise ValueError("没有可用的模型自带音色")
                 sft_spk = sft_spks[0]
             if sft_spk not in sft_spks:
-                raise ValueError(f"预训练音色 {sft_spk} 不存在")
+                raise ValueError(f"模型自带音色 {sft_spk} 不存在")
 
         elif mode == "clone" or mode == "crosslingual":
             # 克隆和跨语种生成需要指定提示音频和提示文本

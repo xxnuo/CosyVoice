@@ -12,6 +12,7 @@ class Config:
     sample_rate = os.getenv("SAMPLE_RATE", 24000)
     max_val = os.getenv("MAX_VAL", 0.8)
     prompt_sr = os.getenv("PROMPT_SR", 16000)
+    default_spk = os.getenv("DEFAULT_SPK", "中文女")
 
     # 预装音色
     voice_dir = os.getenv("VOICE_DIR", "/app/voices")
