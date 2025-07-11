@@ -1,6 +1,8 @@
 import os
 import random
 import sys
+import time
+import threading
 from typing import Literal
 
 import librosa
@@ -30,6 +32,39 @@ class CosyVoiceEngine:
         self.ok = False
         self.cosyvoice = None
         self.default_data = np.zeros(Config.sample_rate)
+        self.last_used_time = 0  # 最后一次使用时间
+        self.idle_timeout = Config.idle_timeout  # 闲置超时时间（秒），默认10分钟
+        self.timer_thread = None
+        self.timer_stop_event = threading.Event()
+        self._start_idle_timer()  # 启动闲置检查定时器
+
+    def _start_idle_timer(self):
+        """启动闲置检查定时器线程"""
+        if self.timer_thread is not None and self.timer_thread.is_alive():
+            self.timer_stop_event.set()  # 停止旧的定时器线程
+            self.timer_thread.join()  # 等待线程结束
+
+        self.timer_stop_event.clear()  # 重置停止事件
+        self.timer_thread = threading.Thread(target=self._idle_timer_task)
+        self.timer_thread.daemon = True  # 设为守护线程，主程序退出时自动结束
+        self.timer_thread.start()
+
+    def _idle_timer_task(self):
+        """定时器线程任务，定期检查模型闲置状态"""
+        check_interval = 60  # 每60秒检查一次
+        while not self.timer_stop_event.is_set():
+            if self.ok and self.last_used_time > 0:
+                current_time = time.time()
+                if current_time - self.last_used_time > self.idle_timeout:
+                    logger.info(
+                        f"Model idle for {self.idle_timeout} seconds, unloading..."
+                    )
+                    self.unload_model()
+            time.sleep(check_interval)
+
+    def reset_timer(self):
+        """重置闲置计时器"""
+        self.last_used_time = time.time()
 
     def postprocess(
         self,
@@ -51,6 +86,7 @@ class CosyVoiceEngine:
     def load_model(self, model_name: str = Config.model_name):
         """加载指定的模型"""
         if self.cosyvoice is not None and self.ok:
+            self.reset_timer()  # 重置计时器
             return
 
         logger.info(f"Loading model: {model_name}")
@@ -64,6 +100,7 @@ class CosyVoiceEngine:
 
         logger.info(f"Model {model_name} loaded")
         self.ok = True
+        self.reset_timer()  # 重置计时器
 
     def unload_model(self):
         """卸载当前加载的模型并释放资源"""
@@ -72,10 +109,12 @@ class CosyVoiceEngine:
             self.cosyvoice = None
             torch.cuda.empty_cache()
             self.ok = False
+            self.last_used_time = 0  # 重置最后使用时间
 
     def get_available_spks(self):
         """获取可用的模型自带音色列表"""
         if self.cosyvoice is not None and self.ok:
+            self.reset_timer()  # 重置计时器
             return self.cosyvoice.list_available_spks()
         return []
 
@@ -100,6 +139,8 @@ class CosyVoiceEngine:
         # 自动加载模型
         if self.cosyvoice is None or not self.ok:
             self.load_model(Config.model_name)
+        else:
+            self.reset_timer()  # 重置计时器
 
         # 随机化种子
         if randomize_seed:
@@ -161,6 +202,15 @@ class CosyVoiceEngine:
                 tts_text, prompt_speech_16k, stream=stream, speed=speed
             ):
                 yield (tts_sr, i["tts_speech"].numpy().flatten())
+
+        # 重置计时器
+        self.reset_timer()
+
+    def __del__(self):
+        """析构函数，确保定时器线程被正确停止"""
+        if self.timer_thread and self.timer_thread.is_alive():
+            self.timer_stop_event.set()
+            self.timer_thread.join(timeout=1.0)  # 等待线程结束，最多等待1秒
 
 
 if __name__ == "__main__":
