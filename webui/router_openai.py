@@ -41,7 +41,7 @@ def voice_listen(voice: str):
 def create_speech(
     request: OpenAISpeechRequest,
     client_request: Request,  # 兼容性参数
-    x_raw_response: str = Header(None, alias="x-raw-response"),  # 兼容性参数
+    x_raw_response: str,  # = Header(None, alias="x-raw-response"),  # 兼容性参数
 ):
     """生成音频"""
     # 解析请求
