@@ -164,19 +164,44 @@ def create_speech(
             else:
                 # 非流式模式：收集所有音频片段并合并
                 audio_chunks = []
-                for _, audio_data in generator:
-                    audio_chunks.append(audio_data)
+                sample_rate = Config.sample_rate  # 默认采样率
+                
+                try:
+                    for sr, audio_data in generator:
+                        audio_chunks.append(audio_data)
+                        sample_rate = sr  # 保存采样率
+                except Exception as e:
+                    logger.error(f"非流式音频生成错误: {str(e)}")
+                    raise HTTPException(status_code=500, detail=f"非流式音频生成错误: {str(e)}")
 
                 # 合并所有音频片段
                 if audio_chunks:
                     combined_audio = np.concatenate(audio_chunks)
-                    audio_bytes = (combined_audio * (2**15)).astype("int16").tobytes()
+                    
+                    # 转换为16位整数PCM
+                    audio_int16 = (combined_audio * (2**15)).astype("int16")
+                    
+                    # 使用 WAV 格式
+                    import io
+                    import wave
+                    
+                    # 创建内存中的 WAV 文件
+                    wav_buffer = io.BytesIO()
+                    with wave.open(wav_buffer, "wb") as wav_file:
+                        wav_file.setnchannels(1)  # 单声道
+                        wav_file.setsampwidth(2)  # 16位 = 2字节
+                        wav_file.setframerate(sample_rate)
+                        wav_file.writeframes(audio_int16.tobytes())
+                    
+                    wav_buffer.seek(0)
+                    wav_data = wav_buffer.read()
 
                     return Response(
-                        content=audio_bytes,
+                        content=wav_data,
                         media_type=f"audio/{request.response_format}",
                         headers={
                             "Cache-Control": "no-cache",
+                            "Content-Type": f"audio/{request.response_format}",
                         },
                     )
                 else:
