@@ -28,7 +28,8 @@ def voice_sft_list():
 @router.post("/audio/voices", description="获取预装音色列表")
 def voice_list():
     """获取预装音色列表"""
-    return {"status": "success", "voices": os.listdir(Config.voice_dir)}
+    voices = [file for file in os.listdir(Config.voice_dir) if file.endswith('.wav')]
+    return {"status": "success", "voices": voices}
 
 
 @router.get("/audio/voices/listen", description="[专属] 试听预装音色")
