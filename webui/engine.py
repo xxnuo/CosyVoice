@@ -153,8 +153,8 @@ class CosyVoiceEngine:
         # 检查可选参数
         if mode == "sft":
             # 模型自带生成需要指定模型自带音色
+            sft_spks = self.get_available_spks()
             if sft_spk == "":
-                sft_spks = self.get_available_spks()
                 if len(sft_spks) == 0:
                     raise ValueError("没有可用的模型自带音色")
                 sft_spk = sft_spks[0]
