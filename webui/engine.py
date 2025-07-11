@@ -126,7 +126,7 @@ class CosyVoiceEngine:
         mode: Literal[
             "sft", "clone", "crosslingual"
         ] = "sft",  # 可选值：sft（模型自带音色）、clone（克隆音色）、crosslingual（跨语种克隆音色）
-        sft_spk: str = Config.default_spk,  # 要使用的模型自带音色，如果为空，则使用默认音色
+        spk_id: str = Config.default_spk,  # 要使用的模型自带音色，如果为空，则使用默认音色
         tts_text: str = "",  # 要生成的文本
         prompt_wav_text: str = "",  # 要使用的提示文本
         prompt_wav_path: str = "",  # 要使用的提示音频
@@ -157,12 +157,12 @@ class CosyVoiceEngine:
         if mode == "sft":
             # 模型自带生成需要指定模型自带音色
             sft_spks = self.get_available_spks()
-            if sft_spk == "":
+            if spk_id == "":
                 if len(sft_spks) == 0:
                     raise ValueError("没有可用的模型自带音色")
-                sft_spk = sft_spks[0]
-            if sft_spk not in sft_spks:
-                raise ValueError(f"模型自带音色 {sft_spk} 不存在")
+                spk_id = sft_spks[0]
+            if spk_id not in sft_spks:
+                raise ValueError(f"模型自带音色 {spk_id} 不存在")
 
         elif mode == "clone" or mode == "crosslingual":
             # 克隆和跨语种生成需要指定提示音频和提示文本
@@ -180,7 +180,7 @@ class CosyVoiceEngine:
             set_all_random_seed(seed)
             for i in self.cosyvoice.inference_sft(
                 tts_text=tts_text,
-                sft_spk=sft_spk,
+                spk_id=spk_id,
                 stream=stream,
                 speed=speed,
             ):

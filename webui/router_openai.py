@@ -31,7 +31,7 @@ def voice_list():
     return {"status": "success", "voices": os.listdir(Config.voice_dir)}
 
 
-@router.post("/audio/voices/listen", description="[专属] 试听预装音色")
+@router.get("/audio/voices/listen", description="[专属] 试听预装音色")
 def voice_listen(voice: str):
     """[专属] 试听预装音色"""
     voice_wav_path = os.path.join(Config.voice_dir, voice)
@@ -130,7 +130,7 @@ def create_speech(
         with global_engine_lock:
             generator = engine.generate(
                 mode=mode,
-                sft_spk=voice,
+                spk_id=voice,
                 tts_text=tts_text,
                 prompt_wav_path=prompt_wav_path,
                 prompt_wav_text=prompt_wav_text,
