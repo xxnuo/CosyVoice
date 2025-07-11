@@ -40,8 +40,8 @@ def voice_listen(voice: str):
 @router.post("/audio/speech", description="生成音频")
 def create_speech(
     request: OpenAISpeechRequest,
-    client_request: Request,  # 兼容性参数
-    x_raw_response: str,  # = Header(None, alias="x-raw-response"),  # 兼容性参数
+    # client_request: Request,  # 兼容性参数
+    # x_raw_response: str,  # = Header(None, alias="x-raw-response"),  # 兼容性参数
 ):
     """生成音频"""
     # 解析请求
