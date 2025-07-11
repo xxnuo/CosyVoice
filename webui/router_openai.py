@@ -186,6 +186,7 @@ def create_speech(
                         "Cache-Control": "no-cache",
                         "Content-Type": f"audio/{request.response_format}",
                         "Transfer-Encoding": "chunked",
+                        "Content-Encoding": "identity",  # 禁用压缩
                     },
                 )
             else:
@@ -227,6 +228,7 @@ def create_speech(
                         headers={
                             "Cache-Control": "no-cache",
                             "Content-Type": f"audio/{request.response_format}",
+                            "Content-Encoding": "identity",  # 禁用压缩
                         },
                     )
                 else:
