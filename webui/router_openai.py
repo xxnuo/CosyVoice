@@ -18,7 +18,7 @@ router = APIRouter(
 )
 
 
-@router.post(
+@router.get(
     "/audio/voices_sft",
     description="[专属] 获取模型自带音色列表",
 )
@@ -27,7 +27,7 @@ def voice_sft_list():
     return {"status": "success", "voices": engine.get_available_spks()}
 
 
-@router.post("/audio/voices", description="获取预装音色列表")
+@router.get("/audio/voices", description="获取预装音色列表")
 def voice_list():
     """获取预装音色列表"""
     voices = [file for file in os.listdir(Config.voice_dir) if file.endswith(".wav")]
