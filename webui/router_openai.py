@@ -4,7 +4,7 @@ import os
 import wave
 
 import numpy as np
-from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse, Response, StreamingResponse
 
 from webui.config import Config
