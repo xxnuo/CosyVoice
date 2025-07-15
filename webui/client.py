@@ -199,10 +199,10 @@ class CosyVoiceClient:
         if save_path is None:
             save_path = f"{ClientConfig.OUTPUT_DIR}/{uuid4()}.wav"
 
-        # 保存流式数据
+        # 保存流式数据 - 现在服务器返回的是完整的WAV文件
         with open(save_path, "wb") as f:
-            for chunk in response.iter_bytes():
-                f.write(chunk)
+            # 直接写入完整的WAV文件数据
+            f.write(response.content)
 
         logger.info(f"语音已保存至: {save_path}")
         return save_path
